@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
-const port = 8000;
+const port = process.env.port || 8000;
 const connectionUrl = process.env.ConnectionUrl;
 
 app.use(cors());
@@ -22,6 +22,7 @@ mongoose
   );
 
 app.use("/api/", OurRouter);
+app.get("/", (req, res) => res.send("Server is running at localhost 8000 !"));
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);
