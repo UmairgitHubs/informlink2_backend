@@ -58,47 +58,61 @@ export const LoginUser = async (req, res) => {
 export const RegisterUser = async (req, res) => {
   console.log("/RegisterUser");
 
-  const data = req.body;
-  const { name, email, password, confirmPassword } = data;
+  const { name, email, password, confirmPassword } = req.body;
+
+  // Validate input using Joi or your chosen validation library
   const { error } = registerSchemaValidation.validate({
     name,
     email,
     password,
   });
 
-  if (error)
-    return res.json({
+  if (error) {
+    // Return validation error with HTTP status code 400 (Bad Request)
+    return res.status(400).json({
       success: false,
       message: error.details[0].message.replace(/['"]+/g, ""),
     });
+  }
 
   try {
+    // Check if the user already exists
     const ifExist = await User.findOne({ email });
 
     if (ifExist) {
-      return res.json({ success: false, message: "User Already Exist" });
-    } else {
-      const hashedPassword = await hash(password, 12);
-      const createUser = await User.create({
-        email,
-        name,
-        password: hashedPassword,
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
+    }
+
+    // Hash the user's password
+    const hashedPassword = await hash(password, 12);
+
+    // Create a new user
+    const createUser = await User.create({
+      email,
+      name,
+      password: hashedPassword,
+    });
+
+    if (createUser) {
+      console.log("User created:", createUser);
+
+      // Return success response
+      return res.status(201).json({
+        success: true,
+        message: "Account created successfully",
       });
-      if (createUser) {
-        console.log("User created:", createUser);
-        return res.json({
-          success: true,
-          message: "Account created successfully",
-        });
-      } else {
-        throw new Error("Failed to create user");
-      }
+    } else {
+      throw new Error("Failed to create user");
     }
   } catch (error) {
-    console.log("🚀 ~ file: index.js:55 ~ RegisterUser ~ error:", error);
-    return res.json({
+    console.error("🚀 ~ RegisterUser ~ error:", error);
+
+    // Return generic error response with status code 500 (Internal Server Error)
+    return res.status(500).json({
       success: false,
-      message: "Something Went Wrong Please Retry Later !",
+      message: "Something went wrong, please try again later!",
     });
   }
 };
