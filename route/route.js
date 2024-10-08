@@ -11,8 +11,8 @@ Router.get("/", (req, res) =>
   res.send("Server is running at localhost 8000 !")
 );
 
-Router.use("*", (req, res) => {
-  res.status(404).json({ error: "Requested Endpoint not Found !" });
-});
+// Router.use("*", (req, res) => {
+//   res.status(404).json({ error: "Requested Endpoint not Found !" });
+// });
 
 export default Router;
