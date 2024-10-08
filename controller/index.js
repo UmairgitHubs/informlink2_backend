@@ -8,6 +8,8 @@ const { hash, compare } = pkg;
 import jwt from "jsonwebtoken";
 
 export const LoginUser = async (req, res) => {
+  console.log("/LoginUser");
+
   const data = req.body;
   const { email, password } = data;
   const { error } = LoginschemaValidation.validate({ email, password });
@@ -54,6 +56,8 @@ export const LoginUser = async (req, res) => {
 };
 
 export const RegisterUser = async (req, res) => {
+  console.log("/RegisterUser");
+
   const data = req.body;
   const { name, email, password, confirmPassword } = data;
   const { error } = registerSchemaValidation.validate({
@@ -69,32 +73,32 @@ export const RegisterUser = async (req, res) => {
     });
 
   try {
-  const ifExist = await User.findOne({ email });
+    const ifExist = await User.findOne({ email });
 
-  if (ifExist) {
-    return res.json({ success: false, message: "User Already Exist" });
-  } else {
-    const hashedPassword = await hash(password, 12);
-    const createUser = await User.create({
-      email,
-      name,
-      password: hashedPassword,
-    });
-    if (createUser) {
-      console.log("User created:", createUser);
-      return res.json({
-        success: true,
-        message: "Account created successfully",
-      });
+    if (ifExist) {
+      return res.json({ success: false, message: "User Already Exist" });
     } else {
-      throw new Error("Failed to create user");
+      const hashedPassword = await hash(password, 12);
+      const createUser = await User.create({
+        email,
+        name,
+        password: hashedPassword,
+      });
+      if (createUser) {
+        console.log("User created:", createUser);
+        return res.json({
+          success: true,
+          message: "Account created successfully",
+        });
+      } else {
+        throw new Error("Failed to create user");
+      }
     }
+  } catch (error) {
+    console.log("🚀 ~ file: index.js:55 ~ RegisterUser ~ error:", error);
+    return res.json({
+      success: false,
+      message: "Something Went Wrong Please Retry Later !",
+    });
   }
-} catch (error) {
-  console.log("🚀 ~ file: index.js:55 ~ RegisterUser ~ error:", error);
-  return res.json({
-    success: false,
-    message: "Something Went Wrong Please Retry Later !",
-  });
-}
 };
